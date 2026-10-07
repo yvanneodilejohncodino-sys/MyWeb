@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Art Gallery | My Photo Gallery</title>
+
+    <style>
+        /* =================================
+           RESET
+        ================================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+
+            font-family: Arial, Helvetica, sans-serif;
+            color: #ffffff;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #8a2be2,
+                    #4b0082,
+                    #17002b,
+                    #000000,
+                    #5a189a
+                );
+
+            background-size: 400% 400%;
+            animation: backgroundMove 15s ease infinite;
+
+            padding: 50px 20px;
+
+            overflow-x: hidden;
+
+            position: relative;
+        }
+
+        /* =================================
+           BACKGROUND GLOWS
+        ================================= */
+
+        body::before,
+        body::after {
+            content: "";
+
+            position: fixed;
+
+            width: 300px;
+            height: 300px;
+
+            border-radius: 50%;
+
+            background: rgba(174, 85, 255, 0.18);
+
+            filter: blur(80px);
+
+            pointer-events: none;
+
+            z-index: 0;
+        }
+
+        body::before {
+            top: 5%;
+            left: 5%;
+
+            animation:
+                floatingGlow
+                9s
+                ease-in-out
+                infinite;
+        }
+
+        body::after {
+            right: 5%;
+            bottom: 5%;
+
+            animation:
+                floatingGlowReverse
+                11s
+                ease-in-out
+                infinite;
+        }
+
+        /* =================================
+           MAIN CONTAINER
+        ================================= */
+
+        .gallery-container {
+            width: 100%;
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            text-align: center;
+
+            position: relative;
+            z-index: 1;
+
+            animation:
+                galleryAppear
+                1s
+                ease
+                forwards;
+        }
+
+        /* =================================
+           HEADER
+        ================================= */
+
+        .gallery-title {
+            font-size: 3rem;
+
+            margin-bottom: 10px;
+
+            font-weight: bold;
+
+            letter-spacing: 3px;
+
+            text-shadow:
+                0 0 10px #b56cff,
+                0 0 20px #8a2be2,
+                0 0 40px
+                rgba(181, 108, 255, 0.6);
+
+            opacity: 0;
+
+            animation:
+                titleAppear
+                1s
+                ease
+                forwards,
+
+                titleGlow
+                3s
+                ease-in-out
+                1s
+                infinite;
+        }
+
+        .gallery-subtitle {
+            color: #d8b9ff;
+
+            margin-bottom: 40px;
+
+            font-size: 1.1rem;
+
+            opacity: 0;
+
+            animation:
+                subtitleAppear
+                1s
+                ease
+                0.3s
+                forwards;
+        }
+
+        /* =================================
+           GALLERY GRID
+        ================================= */
+
+        .gallery {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap: 25px;
+
+            justify-items: center;
+        }
+
+        /* =================================
+           PHOTO CARDS
+        ================================= */
+
+        .photo-card {
+            width: 100%;
+            max-width: 350px;
+
+            background:
+                rgba(0, 0, 0, 0.45);
+
+            border:
+                1px solid
+                rgba(190, 120, 255, 0.5);
+
+            border-radius: 18px;
+
+            padding: 10px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0, 0, 0, 0.6),
+
+                0 0 20px
+                rgba(138, 43, 226, 0.25);
+
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+
+            opacity: 0;
+
+            animation:
+                cardAppear
+                0.8s
+                ease
+                forwards,
+
+                cardFloat
+                5s
+                ease-in-out
+                infinite;
+
+            transition:
+                transform 0.4s ease,
+                box-shadow 0.4s ease,
+                border-color 0.4s ease;
+        }
+
+        /* =================================
+           STAGGERED ANIMATIONS
+        ================================= */
+
+        .photo-card:nth-child(1) {
+            animation-delay:
+                0.2s,
+                1.5s;
+        }
+
+        .photo-card:nth-child(2) {
+            animation-delay:
+                0.35s,
+                1.8s;
+        }
+
+        .photo-card:nth-child(3) {
+            animation-delay:
+                0.5s,
+                2.1s;
+        }
+
+        .photo-card:nth-child(4) {
+            animation-delay:
+                0.65s,
+                2.4s;
+        }
+
+        .photo-card:nth-child(5) {
+            animation-delay:
+                0.8s,
+                2.7s;
+        }
+
+        .photo-card:nth-child(6) {
+            animation-delay:
+                0.95s,
+                3s;
+        }
+
+        /* =================================
+           CARD HOVER
+        ================================= */
+
+        .photo-card:hover {
+            transform:
+                translateY(-15px)
+                scale(1.03);
+
+            border-color: #c77dff;
+
+            box-shadow:
+                0 20px 45px
+                rgba(0, 0, 0, 0.8),
+
+                0 0 30px
+                rgba(174, 85, 255, 0.7),
+
+                0 0 60px
+                rgba(138, 43, 226, 0.3);
+
+            animation-play-state: paused;
+        }
+
+        /* =================================
+           IMAGES
+        ================================= */
+
+        .photo-card img {
+            width: 100%;
+            height: 250px;
+
+            object-fit: cover;
+
+            display: block;
+
+            border-radius: 12px;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.6s ease,
+                filter 0.5s ease,
+                box-shadow 0.5s ease;
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.08);
+
+            filter:
+                brightness(1.1)
+                saturate(1.15);
+
+            box-shadow:
+                0 0 25px
+                rgba(190, 108, 255, 0.5);
+        }
+
+        .photo-card img:focus-visible {
+            outline:
+                3px solid
+                #d8b4fe;
+
+            outline-offset: 4px;
+        }
+
+        /* =================================
+           PHOTO TEXT
+        ================================= */
+
+        .photo-title {
+            padding:
+                15px 5px 8px;
+
+            font-size: 1.1rem;
+
+            font-weight: bold;
+
+            color: #ffffff;
+
+            transition:
+                0.3s ease;
+        }
+
+        .photo-card:hover .photo-title {
+            color: #e0aaff;
+
+            text-shadow:
+                0 0 10px
+                rgba(199, 125, 255, 0.7);
+        }
+
+        .photo-description {
+            color: #cbb4df;
+
+            font-size: 0.9rem;
+
+            line-height: 1.5;
+
+            padding:
+                0 5px 12px;
+
+            transition:
+                0.3s ease;
+        }
+
+        .photo-card:hover .photo-description {
+            color: #eeeeee;
+        }
+
+        /* =================================
+           NAVIGATION
+        ================================= */
+
+        .navigation {
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            gap: 15px;
+
+            margin-top: 45px;
+        }
+
+        .btn {
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            min-width: 150px;
+
+            padding:
+                13px 22px;
+
+            color: #ffffff;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #8a2be2,
+                    #4b0082
+                );
+
+            border:
+                1px solid
+                #bd6cff;
+
+            border-radius: 30px;
+
+            text-decoration: none;
+
+            font-size: 0.95rem;
+
+            font-weight: bold;
+
+            letter-spacing: 0.5px;
+
+            box-shadow:
+                0 0 15px
+                rgba(174, 85, 255, 0.35);
+
+            transition:
+                transform 0.3s ease,
+                box-shadow 0.3s ease,
+                background 0.3s ease;
+
+            opacity: 0;
+
+            animation:
+                navButtonAppear
+                0.7s
+                ease
+                forwards;
+        }
+
+        .btn:nth-child(1) {
+            animation-delay: 1.4s;
+        }
+
+        .btn:nth-child(2) {
+            animation-delay: 1.5s;
+        }
+
+        .btn:nth-child(3) {
+            animation-delay: 1.6s;
+        }
+
+        .btn:nth-child(4) {
+            animation-delay: 1.7s;
+        }
+
+        .btn:nth-child(5) {
+            animation-delay: 1.8s;
+        }
+
+        .btn:hover {
+            transform:
+                translateY(-5px)
+                scale(1.05);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #a855f7,
+                    #6a0dad
+                );
+
+            box-shadow:
+                0 0 20px
+                rgba(190, 108, 255, 0.8),
+
+                0 0 40px
+                rgba(190, 108, 255, 0.4);
+        }
+
+        .btn:focus-visible {
+            outline:
+                3px solid
+                #ffffff;
+
+            outline-offset: 4px;
+        }
+
+        /* =================================
+           LIGHTBOX
+        ================================= */
+
+        .lightbox {
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(0, 0, 0, 0.94);
+
+            display: none;
+
+            justify-content: center;
+
+            align-items: center;
+
+            z-index: 9999;
+
+            padding: 30px;
+
+            opacity: 0;
+        }
+
+        .lightbox.active {
+            display: flex;
+
+            animation:
+                lightboxFadeIn
+                0.35s
+                ease
+                forwards;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+
+            max-height: 85vh;
+
+            object-fit: contain;
+
+            border-radius: 15px;
+
+            box-shadow:
+                0 0 40px
+                rgba(174, 85, 255, 0.7),
+
+                0 0 80px
+                rgba(138, 43, 226, 0.35);
+
+            animation:
+                imageZoomIn
+                0.45s
+                ease
+                forwards;
+        }
+
+        /* =================================
+           CLOSE BUTTON
+        ================================= */
+
+        .close {
+            position: absolute;
+
+            top: 20px;
+
+            right: 30px;
+
+            width: 50px;
+
+            height: 50px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 42px;
+
+            line-height: 1;
+
+            color: #ffffff;
+
+            background:
+                rgba(0, 0, 0, 0.35);
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.2);
+
+            border-radius: 50%;
+
+            cursor: pointer;
+
+            transition:
+                color 0.2s ease,
+                transform 0.3s ease,
+                background 0.3s ease;
+        }
+
+        .close:hover {
+            color: #bd6cff;
+
+            background:
+                rgba(138, 43, 226, 0.25);
+
+            transform:
+                rotate(90deg)
+                scale(1.1);
+
+            text-shadow:
+                0 0 15px
+                #bd6cff;
+        }
+
+        .close:focus-visible {
+            outline:
+                3px solid
+                #ffffff;
+
+            outline-offset: 4px;
+        }
+
+        /* =================================
+           ANIMATIONS
+        ================================= */
+
+        @keyframes backgroundMove {
+
+            0% {
+                background-position:
+                    0% 50%;
+            }
+
+            50% {
+                background-position:
+                    100% 50%;
+            }
+
+            100% {
+                background-position:
+                    0% 50%;
+            }
+        }
+
+        @keyframes floatingGlow {
+
+            0%,
+            100% {
+                transform:
+                    translate(0, 0)
+                    scale(1);
+            }
+
+            50% {
+                transform:
+                    translate(90px, 50px)
+                    scale(1.25);
+            }
+        }
+
+        @keyframes floatingGlowReverse {
+
+            0%,
+            100% {
+                transform:
+                    translate(0, 0)
+                    scale(1);
+            }
+
+            50% {
+                transform:
+                    translate(-80px, -60px)
+                    scale(1.2);
+            }
+        }
+
+        @keyframes galleryAppear {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(35px);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+        @keyframes titleAppear {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(-30px)
+                    scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    scale(1);
+            }
+        }
+
+        @keyframes subtitleAppear {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+        @keyframes titleGlow {
+
+            0%,
+            100% {
+                text-shadow:
+                    0 0 10px #b56cff,
+                    0 0 20px #8a2be2,
+                    0 0 40px
+                    rgba(181, 108, 255, 0.5);
+            }
+
+            50% {
+                text-shadow:
+                    0 0 20px #d8b4fe,
+                    0 0 40px #a855f7,
+                    0 0 65px
+                    rgba(181, 108, 255, 0.8);
+            }
+        }
+
+        @keyframes cardAppear {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(50px)
+                    scale(0.85)
+                    rotateX(10deg);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    scale(1)
+                    rotateX(0);
+            }
+        }
+
+        @keyframes cardFloat {
+
+            0%,
+            100% {
+                transform:
+                    translateY(0);
+            }
+
+            50% {
+                transform:
+                    translateY(-7px);
+            }
+        }
+
+        @keyframes navButtonAppear {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(25px)
+                    scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    scale(1);
+            }
+        }
+
+        @keyframes lightboxFadeIn {
+
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes imageZoomIn {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    scale(0.7)
+                    rotate(-2deg);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    scale(1)
+                    rotate(0);
+            }
+        }
+
+        /* =================================
+           TABLET
+        ================================= */
+
+        @media (max-width: 900px) {
+
+            .gallery {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .gallery-title {
+                font-size: 2.6rem;
+            }
+        }
+
+        /* =================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 600px) {
+
+            body {
+                padding:
+                    30px 15px;
+            }
+
+            .gallery-title {
+                font-size: 2.2rem;
+
+                letter-spacing: 1px;
+            }
+
+            .gallery-subtitle {
+                font-size: 1rem;
+
+                margin-bottom: 30px;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+
+                gap: 20px;
+            }
+
+            .photo-card {
+                max-width: 400px;
+            }
+
+            .photo-card img {
+                height: 230px;
+            }
+
+            .navigation {
+                flex-direction: column;
+
+                width: 100%;
+
+                gap: 12px;
+            }
+
+            .btn {
+                width: 100%;
+
+                max-width: 320px;
+            }
+
+            .close {
+                top: 15px;
+
+                right: 15px;
+
+                width: 45px;
+
+                height: 45px;
+
+                font-size: 35px;
+            }
+
+            .lightbox {
+                padding: 20px;
+            }
+
+            .lightbox img {
+                max-width: 96%;
+
+                max-height: 80vh;
+            }
+        }
+
+        /* =================================
+           REDUCED MOTION
+        ================================= */
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration:
+                    0.01ms !important;
+
+                animation-iteration-count:
+                    1 !important;
+
+                scroll-behavior:
+                    auto !important;
+
+                transition-duration:
+                    0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =================================
+         GALLERY
+    ================================= -->
+
+    <main class="gallery-container">
+
+        <h1 class="gallery-title">
+            My Photo Gallery
+        </h1>
+
+        <p class="gallery-subtitle">
+            A collection of beautiful memories
+        </p>
+
+
+        <!-- =================================
+             PHOTO GRID
+        ================================= -->
+
+        <section
+            class="gallery"
+            aria-label="Photo Gallery"
+        >
+
+            <!-- PHOTO 1 -->
+            <article class="photo-card">
+
+                <img
+                    src="https://i.pinimg.com/736x/84/13/14/8413148c41fb1e8315bc4c1c64365b76.jpg"
+                    alt="Death, one of the four horsemen of the apocalypse"
+                    loading="lazy"
+                    tabindex="0"
+                >
+
+                <h2 class="photo-title">
+                    Death
+                </h2>
+
+                <p class="photo-description">
+                    Death, one of the 4 horsemen of the apocalypse.
+                </p>
+
+            </article>
+
+
+            <!-- PHOTO 2 -->
+            <article class="photo-card">
+
+                <img
+                    src="https://i.pinimg.com/736x/3e/9a/ab/3e9aab5e6b7064934dd7bc2e87ba8b16.jpg"
+                    alt="Angel Raphael"
+                    loading="lazy"
+                    tabindex="0"
+                >
+
+                <h2 class="photo-title">
+                    Angel Raphael
+                </h2>
+
+                <p class="photo-description">
+                    The Archangel of Healing.
+                </p>
+
+            </article>
+
+
+            <!-- PHOTO 3 -->
+            <article class="photo-card">
+
+                <img
+                    src="https://i.pinimg.com/736x/02/cd/dc/02cddcb00fd0709e8b5cee60b512af9f.jpg"
+                    alt="Lord Jesus Christ embracing a lost lamb"
+                    loading="lazy"
+                    tabindex="0"
+                >
+
+                <h2 class="photo-title">
+                    Lord Jesus Christ
+                </h2>
+
+                <p class="photo-description">
+                    The Lord Jesus is embracing and rescuing
+                    the small lost lamb.
+                </p>
+
+            </article>
+
+
+            <!-- PHOTO 4 -->
+            <article class="photo-card">
+
+                <img
+                    src="https://i.pinimg.com/736x/a7/b6/10/a7b61081fa15a68c5cf844ad259b171c.jpg"
+                    alt="Mystical Phoenix"
+                    loading="lazy"
+                    tabindex="0"
+                >
+
+                <h2 class="photo-title">
+                    Phoenix
+                </h2>
+
+                <p class="photo-description">
+                    The Mystical Blazing Bird of Rebirth.
+                </p>
+
+            </article>
+
+
+            <!-- PHOTO 5 -->
+            <article class="photo-card">
+
+                <img
+                    src="https://i.pinimg.com/736x/c5/d6/be/c5d6be4bf2039423271cfaf964b9fd6d.jpg"
+                    alt="Zhongli from Genshin Impact"
+                    loading="lazy"
+                    tabindex="0"
+                >
+
+                <h2 class="photo-title">
+                    Zhongli
+                </h2>
+
+                <p class="photo-description">
+                    Zhongli from Genshin Impact is a mysterious,
+                    deeply knowledgeable consultant for the
+                    Wangsheng Funeral Parlor who is secretly the
+                    retired Liyue Geo Archon, Morax.
+                </p>
+
+            </article>
+
+
+            <!-- PHOTO 6 -->
+            <article class="photo-card">
+
+                <img
+                    src="https://i.pinimg.com/1200x/6a/3a/b7/6a3ab75c0ac50a2b1556976d4a6ee833.jpg"
+                    alt="Katsuki Bakugo from My Hero Academia"
+                    loading="lazy"
+                    tabindex="0"
+                >
+
+                <h2 class="photo-title">
+                    Bakugo Katsuki
+                </h2>
+
+                <p class="photo-description">
+                    Katsuki Bakugo is a central protagonist,
+                    student in Class 1-A at U.A. High School,
+                    and rival to Izuku Midoriya in the anime
+                    series My Hero Academia.
+                </p>
+
+            </article>
+
+        </section>
+
+
+        <!-- =================================
+             WEBSITE NAVIGATION
+        ================================= -->
+
+        <nav
+            class="navigation"
+            aria-label="Main website navigation"
+        >
+
+            <a
+                href="index.html"
+                class="btn"
+            >
+                🏠 Home
+            </a>
+
+            <a
+                href="resource.html"
+                class="btn"
+            >
+                📚 Resources
+            </a>
+
+            <a
+                href="accessible.html"
+                class="btn"
+            >
+                🎓 Workshop
+            </a>
+
+            <a
+                href="gallery.html"
+                class="btn"
+                aria-current="page"
+            >
+                🖼️ Gallery
+            </a>
+
+            <a
+                href="contact.html"
+                class="btn"
+            >
+                📱 Contact
+            </a>
+
+        </nav>
+
+    </main>
+
+
+    <!-- =================================
+         LIGHTBOX
+    ================================= -->
+
+    <div
+        class="lightbox"
+        id="lightbox"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Expanded gallery image"
+    >
+
+        <button
+            class="close"
+            id="close"
+            type="button"
+            aria-label="Close image viewer"
+        >
+            &times;
+        </button>
+
+        <img
+            id="lightboxImage"
+            src=""
+            alt="Expanded photo"
+        >
+
+    </div>
+
+
+    <!-- =================================
+         JAVASCRIPT
+    ================================= -->
+
+    <script>
+
+        /* =================================
+           ELEMENTS
+        ================================= */
+
+        const images =
+            document.querySelectorAll(
+                ".photo-card img"
+            );
+
+        const lightbox =
+            document.getElementById(
+                "lightbox"
+            );
+
+        const lightboxImage =
+            document.getElementById(
+                "lightboxImage"
+            );
+
+        const closeButton =
+            document.getElementById(
+                "close"
+            );
+
+
+        /* =================================
+           OPEN LIGHTBOX
+        ================================= */
+
+        function openLightbox(image) {
+
+            lightboxImage.src =
+                image.src;
+
+            lightboxImage.alt =
+                image.alt;
+
+            lightbox.classList.add(
+                "active"
+            );
+
+            document.body.style.overflow =
+                "hidden";
+
+            closeButton.focus();
+        }
+
+
+        /* =================================
+           CLOSE LIGHTBOX
+        ================================= */
+
+        function closeLightbox() {
+
+            lightbox.classList.remove(
+                "active"
+            );
+
+            document.body.style.overflow =
+                "";
+
+            setTimeout(() => {
+
+                lightboxImage.src = "";
+
+            }, 300);
+        }
+
+
+        /* =================================
+           IMAGE CLICK
+        ================================= */
+
+        images.forEach(image => {
+
+            image.addEventListener(
+                "click",
+                () => {
+
+                    openLightbox(image);
+
+                }
+            );
+
+
+            /* Keyboard support */
+
+            image.addEventListener(
+                "keydown",
+                event => {
+
+                    if (
+                        event.key === "Enter" ||
+                        event.key === " "
+                    ) {
+
+                        event.preventDefault();
+
+                        openLightbox(image);
+
+                    }
+
+                }
+            );
+
+        });
+
+
+        /* =================================
+           CLOSE BUTTON
+        ================================= */
+
+        closeButton.addEventListener(
+            "click",
+            closeLightbox
+        );
+
+
+        /* =================================
+           CLICK OUTSIDE IMAGE
+        ================================= */
+
+        lightbox.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target === lightbox
+                ) {
+
+                    closeLightbox();
+
+                }
+
+            }
+        );
+
+
+        /* =================================
+           ESCAPE KEY
+        ================================= */
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Escape" &&
+                    lightbox.classList.contains(
+                        "active"
+                    )
+                ) {
+
+                    closeLightbox();
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>
